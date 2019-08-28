@@ -5,3 +5,5 @@
 *.iml
 *.ipr
 *.iws
+build
+he.DS_Store
