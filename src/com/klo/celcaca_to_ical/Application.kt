@@ -4,10 +4,10 @@ import com.klo.celcaca_to_ical.misc.DateTimeAdapter
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.features.BadRequestException
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.NotFoundException
 import io.ktor.gson.gson
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
@@ -34,6 +34,7 @@ fun Application.module() {
     install(CallLogging)
     install(Koin) {
         modules(celcatModule)
+        modules(icalModule)
     }
     install(ContentNegotiation) {
         gson {
@@ -44,15 +45,38 @@ fun Application.module() {
     routing {
 
         val service: CelcatService by inject()
+        val builder: IcalBuilder by inject()
 
-        get("/ecal/{formation?}") {
-            val formation = call.parameters["formation"] ?: throw BadRequestException("Manque la formation")
-            val events =
-                service.getData(formation)?.map { it.toEvent() } ?: throw NotFoundException("Mauvaise formation")
-            val builder = IcalBuilder()
+        get("test") {
+            log.debug(call.request.queryParameters.getAll("test").toString())
+        }
+
+        get("/ical/{formation?}") {
+
+            //Paramètre formation
+            val formationName = call.parameters["formation"] ?: throw BadRequestException("Manque la formation")
+            val filtreYes = call.request.queryParameters.getAll("filtre_yes")
+            val filtreNo = call.request.queryParameters.getAll("filtre_no")
+
+            val events = when {
+                filtreYes != null && filtreNo != null -> throw Exception("Utilisation des deux filtres :/")
+                filtreYes != null -> {
+                    val categories = filtreYes.map { EventCategory.valueOf(it) }.toTypedArray()
+                    service.getEventsFromCategories(formationName, *categories)
+                }
+                filtreNo != null -> {
+                    val categories = filtreNo.map { EventCategory.valueOf(it) }.toTypedArray()
+                    service.getEventsWithoutCategories(formationName, *categories)
+                }
+                else -> service.getEvents(formationName)
+            }
+
+
             val ical = builder.buildIcal(events)
+
             call.response.header("Content-Disposition", "attachment; filename=\"${ical.name}\"")
             call.respondFile(ical)
+            ical.delete()
 
         }
 

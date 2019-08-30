@@ -2,6 +2,8 @@ package com.klo.celcaca_to_ical
 
 import java.io.File
 
+//DONE
+
 class IcalBuilder {
 
     private val dateFormat = "yyyyMMdd'T'HHmmss'Z'"
@@ -16,7 +18,7 @@ class IcalBuilder {
 
                 for (event in events) {
 
-                    if (event.name in arrayOf("CONGES", "FERIE"))
+                    if (event.category in arrayOf(EventCategory.CONGES, EventCategory.FERIE))
                         continue
 
                     it.println("BEGIN:VEVENT")
