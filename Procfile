@@ -1,1 +1,1 @@
-web: java -jar target/helloworld.jar
+web: java -jar build/libs/celcaca-to-ical-0.0.1-all.jar

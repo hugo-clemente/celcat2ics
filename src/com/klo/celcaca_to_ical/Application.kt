@@ -90,7 +90,7 @@ fun Application.module() {
         get("/url") {
             call.respond(
                 FreeMarkerContent(
-                    "index.ftl",
+                    "urls.ftl",
                     emptyMap<String, String>(),
                     contentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
                 )
