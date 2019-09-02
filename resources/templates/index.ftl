@@ -1,4 +1,5 @@
-<html>
+<#--noinspection JSUnresolvedFunction,JSValidateTypes-->
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -56,28 +57,28 @@
             </div>
 
             <div class="form-group row">
-                <label for="url_TD" class="col-sm-3 col-form-label">TPs :</label>
+                <label for="url_TP" class="col-sm-3 col-form-label">TPs :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-sm" type="text" id="url_TP" readonly>
                 </div>
             </div>
 
             <div class="form-group row">
-                <label for="url_TD" class="col-sm-3 col-form-label">Cours :</label>
+                <label for="url_COURS" class="col-sm-3 col-form-label">Cours :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-sm" type="text" id="url_COURS" readonly>
                 </div>
             </div>
 
             <div class="form-group row">
-                <label for="url_TD" class="col-sm-3 col-form-label">Examens :</label>
+                <label for="url_EXAMEN" class="col-sm-3 col-form-label">Examens :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-sm" type="text" id="url_EXAMEN" readonly>
                 </div>
             </div>
 
             <div class="form-group row">
-                <label for="url_TD" class="col-sm-3 col-form-label">TP non encadres :</label>
+                <label for="url_TP_NON_ENCADRE" class="col-sm-3 col-form-label">TP non encadres :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-sm" type="text" id="url_TP_NON_ENCADRE"
                            readonly>
@@ -85,7 +86,7 @@
             </div>
 
             <div class="form-group row">
-                <label for="url_TD" class="col-sm-3 col-form-label">TP et TP non encadres :</label>
+                <label for="url_TP_ET_TP_NON_ENCADRE" class="col-sm-3 col-form-label">TP et TP non encadres :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-sm" type="text"
                            id="url_TP_ET_TP_NON_ENCADRE" readonly>
@@ -95,7 +96,7 @@
             <div class="form-group">
 
                 <h4 class="mb-3">Reste</h4>
-                <div class="alert alert-warning" role="warning">
+                <div class="alert alert-warning">
                     Comme les cat&eacute;gories de Celcat ne sont pas fixes, il faut pouvoir traiter les cas tels que
                     "REUNION/RENCONTRE" ou encore "SOUTIEN". Cette URL est l&agrave; pour ca. Cochez les cases que vous
                     avez d&eacute;j&agrave; dans votre agenda, pour ne pas les avoir en double, ou prenez toute l'url si
@@ -129,7 +130,7 @@
 
 
                 <div class="form-group row">
-                    <label for="url_TD" class="col-sm-3 col-form-label">Reste :</label>
+                    <label for="url_RESTE" class="col-sm-3 col-form-label">Reste :</label>
                     <div class="col-sm-9">
                         <input class="form-control form-control-sm" type="text"
                                id="url_RESTE" readonly>
@@ -194,6 +195,7 @@
     }
 
     //Changement formation
+    <#--noinspection JSUnusedLocalSymbols-->
     $('#formationName').on('input', function (e) {
 
 
