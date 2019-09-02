@@ -7,33 +7,10 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import java.util.*
 
+//DONE
+
 val yearStartDate = DateTime(2019, 9, 2, 0, 0)
 val yearEndDate = DateTime(2020, 10, 1, 0, 0)
-
-interface CelcatAPIService {
-
-    @FormUrlEncoded
-    @POST("GetCalendarData")
-    fun getEvents(
-        @Field("federationIds") formationName: String,
-        @Field("start") start: String,
-        @Field("end") end: String,
-        @Field("resType") resType: Int = 103,
-        @Field("calView") calView: String = "month"
-    ): Call<List<CelcatEvent>>
-}
-
-class CelcatService(private val api: CelcatAPIService) {
-
-    private val stringFormat = "yyyy-MM-dd"
-
-    fun getData(formation: String): List<CelcatEvent>? = api.getEvents(
-        formationName = formation,
-        start = yearStartDate.toString(stringFormat),
-        end = yearEndDate.toString(stringFormat)
-    ).execute().body()
-
-}
 
 data class CelcatEvent(
     var allDay: Boolean?,
@@ -58,6 +35,7 @@ data class CelcatEvent(
 
         val detailsTab = mutableListOf<String>()
         val descripCelcatPropre = (description
+
             //encodage de merde
             ?.replace("&#39;", "'")
             ?.replace("&#176;", "°")
@@ -73,7 +51,8 @@ data class CelcatEvent(
                 when {
                     it.contains("Salle") -> site += " | $it"
                     it.contains("FSI /") -> site += " | " + it.replace("FSI / ", "")
-                    it.contains("M2") -> ""
+                    it.contains("M2") -> {
+                    }
 
                     else -> {
                         var newString = it
@@ -81,18 +60,19 @@ data class CelcatEvent(
                         //region Removing redundant UE name
                         // Format : E_____ [E______ - Nom UE ]
                         //Cleaning strings
-                        val indexBracket = newString.indexOf('[')
 
-                        if (indexBracket != -1) {
-                            val indexDash = newString.indexOf('-')
-
-                            newString = if (indexDash != -1)
-                                newString.removeRange(0..indexDash + 1)
-                            else
-                                newString.removeRange(0..indexBracket + 1)
-
-                            newString = newString.dropLast(1)
+                        if (newString.contains('[')) {
+                            val indexStartBracket = newString.indexOf('[')
+                            val indexEndBracket = newString.indexOf(']')
+                            newString = newString.removeRange(indexStartBracket - 1..indexEndBracket)
                         }
+
+                        if (newString.contains('-')) {
+                            val indexDash = newString.indexOf('-')
+                            if (indexDash != -1)
+                                newString = newString.removeRange(0..indexDash + 1)
+                        }
+
                         //endregion
 
                         detailsTab.add(newString)
@@ -104,17 +84,76 @@ data class CelcatEvent(
 
 
         val details = detailsTab.joinToString(separator = " - \r\n ")
+        val category = when (eventCategory) {
+            "TD" -> EventCategory.TD
+            "TP" -> EventCategory.TP
+            "COURS" -> EventCategory.COURS
+            "EXAMEN" -> EventCategory.EXAMEN
+            "TP non encadré" -> EventCategory.TP_NON_ENCADRE
+            "CONGES" -> EventCategory.CONGES
+            "FERIE" -> EventCategory.FERIE
+            else -> EventCategory.OTHER
+        }
+
+        //On retire 2 heures pour le mettre en UTC
+        val startDateTime =
+            start?.let { DateTime.parse(it) }?.minusHours(2) ?: throw Exception("No start for this event ??")
+        //S'il n'y a pas de fin à l'event, alors on suppose qu'il dure toute la journée
+        val endDateTime = end?.let { DateTime.parse(it) }?.minusHours(2) ?: startDateTime.plusDays(1)
 
         return Event(
             uid = id ?: UUID.randomUUID().toString(),
-            start = start?.let { DateTime.parse(it) } ?: throw Exception("No start for this event ??"),
-            //S'il n'y a pas de fin à l'event, alors on suppose qu'il dure toute la journée
-            end = end?.let { DateTime.parse(it) } ?: start.let { DateTime.parse(it) }.plusDays(1),
+            start = startDateTime,
+
+            end = endDateTime,
             dtstamp = DateTime.now(),
             location = site ?: "",
             description = details,
-            name = eventCategory ?: ""
+            category = category
         )
 
     }
+}
+
+//si on peut appeler ca une API (┬┬﹏┬┬)
+interface CelcatAPIService {
+
+    @FormUrlEncoded
+    @POST("GetCalendarData")
+    fun getEvents(
+        @Field("federationIds") formationName: String,
+        @Field("start") start: String,
+        @Field("end") end: String,
+        @Field("resType") resType: Int = 103,
+        @Field("calView") calView: String = "month"
+    ): Call<List<CelcatEvent>>
+}
+
+class CelcatService(private val api: CelcatAPIService) {
+
+    private val stringFormat = "yyyy-MM-dd"
+
+    /**
+     * Retourne null si erreur
+     */
+    private fun getCalendarData(formationName: String): List<CelcatEvent> = api.getEvents(
+        formationName = formationName,
+        start = yearStartDate.toString(stringFormat),
+        end = yearEndDate.toString(stringFormat)
+    ).execute().body() ?: throw Exception("Problème lors de la récupération des données de la formation $formationName")
+
+    /**
+     * Retourne null si erreur
+     */
+    fun getEvents(formationName: String): List<Event> {
+        return getCalendarData(formationName).map { it.toEvent() }
+    }
+
+    fun getEventsFromCategories(formationName: String, vararg categories: EventCategory): List<Event> =
+        getEvents(formationName).filter { it.category in categories }
+
+    fun getEventsWithoutCategories(formationName: String, vararg categories: EventCategory): List<Event> =
+        getEvents(formationName).filter { it.category !in categories }
+
+
 }

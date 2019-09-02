@@ -20,3 +20,10 @@ val celcatModule = module {
         CelcatService(api)
     }
 }
+
+val icalModule = module {
+
+    single {
+        IcalBuilder()
+    }
+}

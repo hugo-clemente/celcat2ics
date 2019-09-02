@@ -5,6 +5,8 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import org.joda.time.DateTime
 
+//TODO Utile ?
+
 class DateTimeAdapter : TypeAdapter<DateTime>() {
 
     override fun write(out: JsonWriter?, value: DateTime?) {

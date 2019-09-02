@@ -1,26 +1,25 @@
 package com.klo.celcaca_to_ical
 
 import com.klo.celcaca_to_ical.misc.DateTimeAdapter
+import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.features.BadRequestException
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.NotFoundException
+import io.ktor.freemarker.FreeMarker
+import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.gson.gson
-import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.http.withCharset
 import io.ktor.response.header
+import io.ktor.response.respond
 import io.ktor.response.respondFile
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.html.body
-import kotlinx.html.h1
-import kotlinx.html.li
-import kotlinx.html.ul
 import org.joda.time.DateTime
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
@@ -34,43 +33,68 @@ fun Application.module() {
     install(CallLogging)
     install(Koin) {
         modules(celcatModule)
+        modules(icalModule)
     }
     install(ContentNegotiation) {
         gson {
             registerTypeAdapter(DateTime::class.java, DateTimeAdapter())
         }
     }
+    install(FreeMarker) {
+        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
+    }
 
     routing {
 
         val service: CelcatService by inject()
+        val builder: IcalBuilder by inject()
 
-        get("/ecal/{formation?}") {
-            val formation = call.parameters["formation"] ?: throw BadRequestException("Manque la formation")
-            val events =
-                service.getData(formation)?.map { it.toEvent() } ?: throw NotFoundException("Mauvaise formation")
-            val builder = IcalBuilder()
-            val ical = builder.buildIcal(events)
-            call.response.header("Content-Disposition", "attachment; filename=\"${ical.name}\"")
-            call.respondFile(ical)
+        get("/ical/{formation?}") {
 
-        }
+            //Paramètre formation
+            val formationName = call.parameters["formation"] ?: throw BadRequestException("Manque la formation")
+            val filtreYes = call.request.queryParameters.getAll("filtre_yes")
+            val filtreNo = call.request.queryParameters.getAll("filtre_no")
 
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
+            val events = when {
+                filtreYes != null && filtreNo != null -> throw Exception("Utilisation des deux filtres :/")
+                filtreYes != null -> {
+                    val categories = filtreYes.map { EventCategory.valueOf(it) }.toTypedArray()
 
-        get("/html-dsl") {
-            call.respondHtml {
-                body {
-                    h1 { +"HTML" }
-                    ul {
-                        for (n in 1..10) {
-                            li { +"$n" }
-                        }
-                    }
+                    log.debug("Selecting events from $formationName with categories : ${categories.map { it.toString() }}")
+
+                    service.getEventsFromCategories(formationName, *categories)
+                }
+                filtreNo != null -> {
+                    val categories = filtreNo.map { EventCategory.valueOf(it) }.toTypedArray()
+
+                    log.debug("Selecting events from $formationName without categories : ${categories.map { it.toString() }}")
+
+                    service.getEventsWithoutCategories(formationName, *categories)
+                }
+                else -> {
+                    log.debug("Selecting every events from $formationName")
+                    service.getEvents(formationName)
                 }
             }
+
+
+            val ical = builder.buildIcal(events)
+
+            call.response.header("Content-Disposition", "attachment; filename=\"${ical.name}\"")
+            call.respondFile(ical)
+            ical.delete()
+
+        }
+
+        get("/url") {
+            call.respond(
+                FreeMarkerContent(
+                    "index.ftl",
+                    emptyMap<String, String>(),
+                    contentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
+                )
+            )
         }
     }
 }

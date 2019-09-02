@@ -39,6 +39,7 @@ dependencies {
     compile "ch.qos.logback:logback-classic:$logback_version"
     compile "io.ktor:ktor-server-core:$ktor_version"
     compile "io.ktor:ktor-html-builder:$ktor_version"
+    compile "io.ktor:ktor-freemarker:$ktor_version"
     compile "io.ktor:ktor-client-core:$ktor_version"
     compile "io.ktor:ktor-client-core-jvm:$ktor_version"
     compile 'org.koin:koin-ktor:2.0.1'
@@ -46,7 +47,6 @@ dependencies {
 
     compile 'com.squareup.retrofit2:retrofit:2.6.1'
     compile group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.6.1'
-
 
 
     compile group: 'joda-time', name: 'joda-time', version: '2.10.3'
