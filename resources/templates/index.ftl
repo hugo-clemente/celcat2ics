@@ -3,8 +3,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="Hugo Clémenté">
-    <title>Celcaca Ical Urls</title>
+    <meta name="author" content="Hugo Cl&eacute;ment&eacute;">
+    <title>Celcat To Ics</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -21,9 +21,12 @@
 
 <div class="container">
     <div class="py-5 text-center">
-        <h2>Checkout form</h2>
-        <p class="lead">Below is an example form built entirely with Bootstrap's form controls. Each required form group
-            has a validation state that can be triggered by attempting to submit the form without completing it.</p>
+        <h2>Celcat to ICS</h2>
+        <p class="lead">
+            Ajoutez ces URL &agrave; votre calendrier &eacute;lectronique. Il y a plusieurs calendriers pour pouvoir s&eacute;parer
+            les
+            diff&eacute;rentes cat&eacute;gories de Celcat.
+        </p>
     </div>
 
     <div class="">
@@ -34,7 +37,15 @@
                 <label for="formationName" class="col-sm-3 col-form-label col-form-label-lg">Nom de la formation
                     :</label>
                 <div class="col-sm-9">
-                    <input class="form-control form-control-lg" type="text" id="formationName"></div>
+                    <input class="form-control form-control-lg" type="text" id="formationName"
+                           placeholder="Remplir ici...">
+                    <small class="form-text text-muted">
+                        Le nom de la formation correspond &agrave; la fin de l'URL du calendrier Celcat.<br/>
+                        Exemple :
+                        <i>https://edt.univ-tlse3.fr/calendar2/cal?vt=agendaWeek&dt=2019-09-02&et=group&fid0=</i>
+                        <b><strong><span style="color: black; ">IINA9CMA</span></strong></b>
+                    </small>
+                </div>
             </div>
 
             <div class="form-group row">
@@ -84,6 +95,12 @@
             <div class="form-group">
 
                 <h4 class="mb-3">Reste</h4>
+                <div class="alert alert-warning" role="warning">
+                    Comme les cat&eacute;gories de Celcat ne sont pas fixes, il faut pouvoir traiter les cas tels que
+                    "REUNION/RENCONTRE" ou encore "SOUTIEN". Cette URL est l&agrave; pour ca. Cochez les cases que vous
+                    avez d&eacute;j&agrave; dans votre agenda, pour ne pas les avoir en double, ou prenez toute l'url si
+                    vous ne voulez pas cat&eacute;goriser les cours.
+                </div>
 
                 <div class="form-check form-check-inline">
                     <input type="checkbox" class="form-check-input" id="TD_CHECK">

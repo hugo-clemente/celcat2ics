@@ -60,18 +60,19 @@ data class CelcatEvent(
                         //region Removing redundant UE name
                         // Format : E_____ [E______ - Nom UE ]
                         //Cleaning strings
-                        val indexBracket = newString.indexOf('[')
 
-                        if (indexBracket != -1) {
-                            val indexDash = newString.indexOf('-')
-
-                            newString = if (indexDash != -1)
-                                newString.removeRange(0..indexDash + 1)
-                            else
-                                newString.removeRange(0..indexBracket + 1)
-
-                            newString = newString.dropLast(1)
+                        if (newString.contains('[')) {
+                            val indexStartBracket = newString.indexOf('[')
+                            val indexEndBracket = newString.indexOf(']')
+                            newString = newString.removeRange(indexStartBracket - 1..indexEndBracket)
                         }
+
+                        if (newString.contains('-')) {
+                            val indexDash = newString.indexOf('-')
+                            if (indexDash != -1)
+                                newString = newString.removeRange(0..indexDash + 1)
+                        }
+
                         //endregion
 
                         detailsTab.add(newString)
@@ -94,12 +95,17 @@ data class CelcatEvent(
             else -> EventCategory.OTHER
         }
 
+        //On retire 2 heures pour le mettre en UTC
+        val startDateTime =
+            start?.let { DateTime.parse(it) }?.minusHours(2) ?: throw Exception("No start for this event ??")
+        //S'il n'y a pas de fin à l'event, alors on suppose qu'il dure toute la journée
+        val endDateTime = end?.let { DateTime.parse(it) }?.minusHours(2) ?: startDateTime.plusDays(1)
 
         return Event(
             uid = id ?: UUID.randomUUID().toString(),
-            start = start?.let { DateTime.parse(it) } ?: throw Exception("No start for this event ??"),
-            //S'il n'y a pas de fin à l'event, alors on suppose qu'il dure toute la journée GITAAAANERIE
-            end = end?.let { DateTime.parse(it) } ?: start.let { DateTime.parse(it) }.plusDays(1),
+            start = startDateTime,
+
+            end = endDateTime,
             dtstamp = DateTime.now(),
             location = site ?: "",
             description = details,

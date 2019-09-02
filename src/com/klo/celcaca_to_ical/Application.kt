@@ -87,7 +87,7 @@ fun Application.module() {
 
         }
 
-        get("/") {
+        get("/url") {
             call.respond(
                 FreeMarkerContent(
                     "index.ftl",
