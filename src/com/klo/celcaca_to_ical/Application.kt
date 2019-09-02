@@ -13,6 +13,8 @@ import io.ktor.freemarker.FreeMarker
 import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
+import io.ktor.http.content.resources
+import io.ktor.http.content.static
 import io.ktor.http.withCharset
 import io.ktor.response.header
 import io.ktor.response.respond
@@ -87,10 +89,24 @@ fun Application.module() {
 
         }
 
-        get("/url") {
+        get("/urls") {
             call.respond(
                 FreeMarkerContent(
                     "urls.ftl",
+                    emptyMap<String, String>(),
+                    contentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
+                )
+            )
+        }
+
+        static("/static") {
+            resources("static")
+        }
+
+        get("/") {
+            call.respond(
+                FreeMarkerContent(
+                    "index.ftl",
                     emptyMap<String, String>(),
                     contentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
                 )

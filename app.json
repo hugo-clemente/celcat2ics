@@ -1,6 +1,6 @@
 {
-  "name": "Celcaca to ical",
-  "description": "Oui",
+  "name": "Celcat to ical",
+  "description": "",
   "image": "heroku/java",
   "addons": []
 }

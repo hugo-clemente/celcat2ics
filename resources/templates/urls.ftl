@@ -35,13 +35,13 @@
         <form>
 
             <div class="form-group row">
-                <label for="formationName" class="col-sm-3 col-form-label col-form-label-lg">Nom de la formation
+                <label for="formationName" class="col-sm-3 col-form-label col-form-label-lg">Code de la formation
                     :</label>
                 <div class="col-sm-9">
                     <input class="form-control form-control-lg" type="text" id="formationName"
                            placeholder="Remplir ici...">
                     <small class="form-text text-muted">
-                        Le nom de la formation correspond &agrave; la fin de l'URL du calendrier Celcat.<br/>
+                        Le code de la formation correspond &agrave; la fin de l'URL du calendrier Celcat.<br/>
                         Exemple :
                         <i>https://edt.univ-tlse3.fr/calendar2/cal?vt=agendaWeek&dt=2019-09-02&et=group&fid0=</i>
                         <b><strong><span style="color: black; ">IINA9CMA</span></strong></b>
@@ -145,7 +145,7 @@
     </div>
 
     <footer class="my-5 pt-5 text-muted text-center text-small">
-        <p class="mb-1">Klo</p>
+        <p class="mb-1">&copy; Klo</p>
         <ul class="list-inline">
             <li class="list-inline-item"><a href="https://github.com/Kla-w/celcaca-to-ical">GitHub</a></li>
         </ul>
