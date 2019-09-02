@@ -185,7 +185,7 @@
     var COURS_CHECK = $('#COURS_CHECK');
     var EXAMEN_CHECK = $('#EXAMEN_CHECK');
 
-    var base_url = window.location.origin.replace("http://", '').replace("https://", '');
+    var base_url = window.location.origin;
     var formation_name = "";
     var filtres_no = "";
 
