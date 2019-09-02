@@ -22,5 +22,9 @@ enum class EventCategory {
     TP_NON_ENCADRE,
     CONGES,
     FERIE,
-    OTHER
+    OTHER;
+
+    override fun toString(): String {
+        return name
+    }
 }

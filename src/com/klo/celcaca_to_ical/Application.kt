@@ -1,6 +1,7 @@
 package com.klo.celcaca_to_ical
 
 import com.klo.celcaca_to_ical.misc.DateTimeAdapter
+import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -8,19 +9,17 @@ import io.ktor.application.log
 import io.ktor.features.BadRequestException
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
+import io.ktor.freemarker.FreeMarker
+import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.gson.gson
-import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.http.withCharset
 import io.ktor.response.header
+import io.ktor.response.respond
 import io.ktor.response.respondFile
-import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.html.body
-import kotlinx.html.h1
-import kotlinx.html.li
-import kotlinx.html.ul
 import org.joda.time.DateTime
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
@@ -41,15 +40,14 @@ fun Application.module() {
             registerTypeAdapter(DateTime::class.java, DateTimeAdapter())
         }
     }
+    install(FreeMarker) {
+        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
+    }
 
     routing {
 
         val service: CelcatService by inject()
         val builder: IcalBuilder by inject()
-
-        get("test") {
-            log.debug(call.request.queryParameters.getAll("test").toString())
-        }
 
         get("/ical/{formation?}") {
 
@@ -62,13 +60,22 @@ fun Application.module() {
                 filtreYes != null && filtreNo != null -> throw Exception("Utilisation des deux filtres :/")
                 filtreYes != null -> {
                     val categories = filtreYes.map { EventCategory.valueOf(it) }.toTypedArray()
+
+                    log.debug("Selecting events from $formationName with categories : ${categories.map { it.toString() }}")
+
                     service.getEventsFromCategories(formationName, *categories)
                 }
                 filtreNo != null -> {
                     val categories = filtreNo.map { EventCategory.valueOf(it) }.toTypedArray()
+
+                    log.debug("Selecting events from $formationName without categories : ${categories.map { it.toString() }}")
+
                     service.getEventsWithoutCategories(formationName, *categories)
                 }
-                else -> service.getEvents(formationName)
+                else -> {
+                    log.debug("Selecting every events from $formationName")
+                    service.getEvents(formationName)
+                }
             }
 
 
@@ -81,20 +88,13 @@ fun Application.module() {
         }
 
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
-
-        get("/html-dsl") {
-            call.respondHtml {
-                body {
-                    h1 { +"HTML" }
-                    ul {
-                        for (n in 1..10) {
-                            li { +"$n" }
-                        }
-                    }
-                }
-            }
+            call.respond(
+                FreeMarkerContent(
+                    "index.ftl",
+                    emptyMap<String, String>(),
+                    contentType = ContentType.Text.Html.withCharset(Charsets.UTF_8)
+                )
+            )
         }
     }
 }
