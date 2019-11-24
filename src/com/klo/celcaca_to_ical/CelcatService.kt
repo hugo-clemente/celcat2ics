@@ -1,6 +1,8 @@
 package com.klo.celcaca_to_ical
 
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.LocalDateTime
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -35,7 +37,6 @@ data class CelcatEvent(
 
         val detailsTab = mutableListOf<String>()
         val descripCelcatPropre = (description
-
             //encodage de merde
             ?.replace("&#39;", "'")
             ?.replace("&#176;", "°")
@@ -46,11 +47,14 @@ data class CelcatEvent(
             ?: throw Exception("Pas de description")).toMutableList()
 
 
+        if (site == null) site = ""
         descripCelcatPropre.forEach { line ->
             line.replace("<br />", " || ").let {
                 when {
-                    it.contains("Salle") -> site += " | $it"
-                    it.contains("FSI /") -> site += " | " + it.replace("FSI / ", "")
+                    it.contains("Salle") -> if (site != "") site += " | $it" else site = it
+                    it.contains("FSI /") -> if (site != "") site += " | " + it.replace("FSI / ", "") else site =
+                        it.replace("FSI / ", "")
+
                     it.contains("M2") -> {
                     }
 
@@ -64,7 +68,8 @@ data class CelcatEvent(
                         if (newString.contains('[')) {
                             val indexStartBracket = newString.indexOf('[')
                             val indexEndBracket = newString.indexOf(']')
-                            newString = newString.removeRange(indexStartBracket - 1..indexEndBracket)
+                            println(newString)
+                            newString = newString.removeRange(indexStartBracket..indexEndBracket)
                         }
 
                         if (newString.contains('-')) {
@@ -75,7 +80,8 @@ data class CelcatEvent(
 
                         //endregion
 
-                        detailsTab.add(newString)
+
+                        detailsTab.add(newString.trim())
                     }
                 }
             }
@@ -95,17 +101,19 @@ data class CelcatEvent(
             else -> EventCategory.OTHER
         }
 
-        //On retire 2 heures pour le mettre en UTC
         val startDateTime =
-            start?.let { DateTime.parse(it) }?.minusHours(2) ?: throw Exception("No start for this event ??")
+            start?.let { LocalDateTime.parse(it) }?.toDateTime(DateTimeZone.forID("Europe/Paris"))
+                ?: throw Exception("No start for this event ??")
+
         //S'il n'y a pas de fin à l'event, alors on suppose qu'il dure toute la journée
-        val endDateTime = end?.let { DateTime.parse(it) }?.minusHours(2) ?: startDateTime.plusDays(1)
+        val endDateTime = end?.let { LocalDateTime.parse(it) }?.toDateTime(DateTimeZone.forID("Europe/Paris"))
+            ?: startDateTime.plusDays(1)
 
         return Event(
             uid = id ?: UUID.randomUUID().toString(),
-            start = startDateTime,
+            start = startDateTime.toDateTime(DateTimeZone.UTC),
 
-            end = endDateTime,
+            end = endDateTime.toDateTime(DateTimeZone.UTC),
             dtstamp = DateTime.now(),
             location = site ?: "",
             description = details,
