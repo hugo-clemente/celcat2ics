@@ -11,8 +11,8 @@ import java.util.*
 
 //DONE
 
-val yearStartDate = DateTime(2019, 9, 2, 0, 0)
-val yearEndDate = DateTime(2020, 10, 1, 0, 0)
+val yearStartDate = DateTime(2020, 9, 2, 0, 0)
+val yearEndDate = DateTime(2021, 10, 1, 0, 0)
 
 data class CelcatEvent(
     var allDay: Boolean?,
